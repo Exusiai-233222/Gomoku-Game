@@ -39,7 +39,7 @@ async function getUserStats(userId) {
 
   const rank = rankRows.length > 0 ? rankRows[0].rnk : null;
 
-  // 3. 获取总玩家数（只要下过棋就算）
+  // 3. 获取总玩家数（至少下过一局）
   const [totalRows] = await pool.execute(
     `SELECT COUNT(DISTINCT user_id) AS totalPlayers FROM gomoku_records`,
   );
@@ -56,7 +56,7 @@ async function getUserStats(userId) {
   ];
 }
 
-/** 获取排行榜 */
+/** 获取全站排行榜 */
 async function getLeaderboard(currentUserId = null) {
   const [rows] = await pool.execute(
     `WITH user_stats AS (
@@ -72,19 +72,21 @@ async function getLeaderboard(currentUserId = null) {
               ROW_NUMBER() OVER (ORDER BY wins DESC, losses ASC) AS rnk
        FROM user_stats
      )
-     SELECT ranked.rnk, ranked.wins, ranked.losses, ranked.draws, u.username
+     SELECT ranked.rnk, ranked.user_id, ranked.wins, ranked.losses, ranked.draws, u.username
      FROM ranked
      JOIN users u ON u.id = ranked.user_id
      ORDER BY ranked.rnk ASC LIMIT 20`,
+    [],
   );
 
+  // 将数据库返回的下划线格式映射为前端需要的驼峰格式
   const entries = rows.map((r) => ({
     rank: r.rnk,
     username: r.username,
     wins: r.wins,
     losses: r.losses,
     draws: r.draws,
-    isMe: r.user_id === currentUserId,
+    isMe: r.user_id === currentUserId, // 判断是否是自己，用于前端高亮
   }));
 
   const myStats = currentUserId ? await getUserStats(currentUserId) : [null];
