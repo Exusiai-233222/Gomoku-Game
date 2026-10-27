@@ -37,7 +37,7 @@ app.use(
 
 // --- API 路由 ---
 app.use("/api", authRouter);
-app.use("/api/records", recordsRouter); // <--- 核心就在这行，挂载成绩接口
+app.use("/api/records", recordsRouter);
 
 // 健康检查
 app.get("/api/health", async (req, res) => {
@@ -49,12 +49,11 @@ app.get("/api/health", async (req, res) => {
   res.json({ ok: true, database: dbStatus });
 });
 
-// 排行榜
+// 排行榜 (已修改：去掉了 size 参数)
 const { getLeaderboard } = require("./services/ranking");
 app.get("/api/leaderboard", async (req, res, next) => {
   try {
-    const size = Number(req.query.size) || 3;
-    const data = await getLeaderboard(size, req.session.userId);
+    const data = await getLeaderboard(req.session.userId);
     res.json({ ok: true, ...data });
   } catch (error) {
     next(error);

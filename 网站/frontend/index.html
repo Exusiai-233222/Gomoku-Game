@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0a0918" />
-    <title>登录 · 弹珠游戏</title>
+    <title>登录 · 五子棋对战</title>
     <link
       rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🔴%3C/text%3E%3C/svg%3E"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E⚫%3C/text%3E%3C/svg%3E"
     />
     <link rel="stylesheet" href="css/style.css" />
   </head>
@@ -15,10 +15,11 @@
   <body class="auth-page">
     <div class="auth-shell">
       <div class="auth-brand">
-        <div class="brand-mark" aria-hidden="true">🔴</div>
+        <!-- 图标换成了黑白棋 -->
+        <div class="brand-mark" aria-hidden="true">⚫</div>
         <div>
-          <h1>弹珠游戏</h1>
-          <p>登录后挑战最快弹珠，登上排行榜</p>
+          <h1>五子棋对战</h1>
+          <p>登录后开启对弈，登顶全站排行榜</p>
         </div>
       </div>
 
@@ -157,11 +158,19 @@
           </p>
         </form>
 
-        <!-- 底部特性列表 -->
-        <ul class="features">
-          <li>🎮 弹珠撞墙，冲击更高关卡</li>
-          <li>⏱ 实时计时与计分，记录每次成绩</li>
-          <li>🏆 查看本人排名与全站排行榜</li>
+        <!-- 底部特性列表（加了点 margin-top 和 padding-left 修复排版） -->
+        <ul
+          class="features"
+          style="
+            margin-top: 20px;
+            padding-left: 20px;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+          "
+        >
+          <li>⚫ 经典五子棋，支持悔棋与倒计时</li>
+          <li>⏱ 超时自动判负，考验你的手速</li>
+          <li>🏆 实时统计胜负场次，登上排行榜</li>
         </ul>
       </div>
     </div>

@@ -1,14 +1,12 @@
 import { api, requireUser, logout } from "./api.js";
 import { mountNav } from "./nav.js";
 
-const userNameEl = document.getElementById("navUser");
 const profileName = document.getElementById("profileName");
 const profileEmail = document.getElementById("profileEmail");
 const profileJoined = document.getElementById("profileJoined");
 const avatar = document.getElementById("avatar");
 const statsGrid = document.getElementById("statsGrid");
 
-// 表单
 const passwordForm = document.getElementById("passwordForm");
 const oldPassword = document.getElementById("oldPassword");
 const newPassword = document.getElementById("newPassword");
@@ -22,38 +20,27 @@ async function loadProfile() {
     if (!user) return;
     mountNav(user);
 
-    // 基本信息
+    // 渲染基本信息
     profileName.textContent = user.username;
     profileEmail.textContent = user.email;
     profileJoined.textContent = `加入时间：${new Date(user.createdAt).toLocaleDateString()}`;
     avatar.textContent = user.username.charAt(0).toUpperCase();
 
-    // 加载战绩
+    // 请求最新的五子棋战绩
     const data = await api("/records/me");
+    const stat = data.stats;
 
-    // 只取弹珠游戏的数据（size === 3）
-    const stat = data.stats.find((s) => s.size === 3) || {
-      bestLevel: "-",
-      bestMs: null,
-      rank: "-",
-      totalPlayers: 0,
-      plays: 0,
-    };
-
-    let timeStr = "-";
-    if (stat.bestMs) {
-      timeStr = (stat.bestMs / 1000).toFixed(1) + "s";
-    }
-
+    // 动态生成战绩卡片
     statsGrid.innerHTML = `
-      <section class="card">
-        <h2><span class="dot"></span>弹珠挑战</h2>
-        <div style="margin-top: 15px; line-height: 2;">
-          <p>最高关卡：<strong style="color: #ffcc00; font-size: 20px;">第 ${stat.bestLevel} 关</strong></p>
-          <p>最佳用时：${timeStr}</p>
-          <p>历史排名：第 ${stat.rank} 名 / 共 ${stat.totalPlayers} 人</p>
-          <p>游玩局数：${stat.plays} 局</p>
+      <section class="card" style="width: 100%;">
+        <h2><span class="dot"></span>五子棋战绩</h2>
+        <div style="display: flex; gap: 30px; margin-top: 15px; font-size: 18px;">
+          <p>总场次：<strong>${stat.total}</strong></p>
+          <p>胜场：<strong style="color: #00cc66;">${stat.wins}</strong></p>
+          <p>败场：<strong style="color: #ff4444;">${stat.losses}</strong></p>
+          <p>平局：<strong>${stat.draws}</strong></p>
         </div>
+        <p style="margin-top: 10px; color: #888;">全站排名：第 <strong>${stat.rank || "-"}</strong> 名 / 共 ${stat.totalPlayers} 人</p>
       </section>
     `;
   } catch (error) {
@@ -61,6 +48,7 @@ async function loadProfile() {
   }
 }
 
+// 处理修改密码
 passwordForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   passwordError.textContent = "";
@@ -74,10 +62,7 @@ passwordForm.addEventListener("submit", async (e) => {
   try {
     const res = await api("/password", {
       method: "POST",
-      body: {
-        oldPassword: oldPassword.value,
-        newPassword: newPassword.value,
-      },
+      body: { oldPassword: oldPassword.value, newPassword: newPassword.value },
     });
     passwordSuccess.textContent = res.message;
     passwordForm.reset();

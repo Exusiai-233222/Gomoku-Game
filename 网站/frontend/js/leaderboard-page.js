@@ -11,13 +11,12 @@ async function loadLeaderboard() {
   myRankBox.innerHTML = "";
 
   try {
-    // 固定请求 size=3 的榜单（弹珠游戏）
-    const data = await api(`/leaderboard?size=3`);
-
+    // 请求后端排行榜数据
+    const data = await api(`/leaderboard`);
     boardDesc.textContent = `共 ${data.total} 名玩家参与`;
 
     if (data.entries.length === 0) {
-      leaderBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #888;">暂无成绩，快去挑战吧！</td></tr>`;
+      leaderBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #888;">暂无对战成绩，快去下棋吧！</td></tr>`;
     } else {
       data.entries.forEach((entry) => {
         const tr = document.createElement("tr");
@@ -28,31 +27,23 @@ async function loadLeaderboard() {
         if (entry.rank === 2) rankDisplay = "🥈 2";
         if (entry.rank === 3) rankDisplay = "🥉 3";
 
-        const totalSec = entry.durationMs / 1000;
-        const m = Math.floor(totalSec / 60)
-          .toString()
-          .padStart(2, "0");
-        const s = Math.floor(totalSec % 60)
-          .toString()
-          .padStart(2, "0");
-        const t = Math.floor((entry.durationMs % 1000) / 100);
-        const timeStr = `${m}:${s}.${t}`;
-
+        // 渲染胜、负、平
         tr.innerHTML = `
           <td>${rankDisplay}</td>
           <td>${entry.username} ${entry.isMe ? '<span style="color:#667eea">(我)</span>' : ""}</td>
-          <td style="color: #ffcc00; font-weight: bold;">第 ${entry.level} 关</td>
-          <td>${timeStr}</td>
-          <td>${new Date(entry.completedAt).toLocaleString()}</td>
+          <td style="color: #00cc66; font-weight: bold;">${entry.wins}</td>
+          <td style="color: #ff4444;">${entry.losses}</td>
+          <td>${entry.draws}</td>
         `;
         leaderBody.appendChild(tr);
       });
     }
 
-    if (data.me) {
-      myRankBox.innerHTML = `我的最佳成绩：<strong>第 ${data.me.level} 关</strong>（${(data.me.durationMs / 1000).toFixed(1)}秒），当前排名第 <strong>${data.me.rank}</strong> 名`;
+    // 显示自己的排名
+    if (data.me && data.me.total > 0) {
+      myRankBox.innerHTML = `我的战绩：<strong style="color:#00cc66">${data.me.wins} 胜</strong> <strong style="color:#ff4444">${data.me.losses} 负</strong> ${data.me.draws} 平，当前排名第 <strong>${data.me.rank}</strong> 名`;
     } else {
-      myRankBox.innerHTML = `你还没有成绩，快去挑战吧！`;
+      myRankBox.innerHTML = `你还没有对战记录，快去挑战吧！`;
     }
   } catch (error) {
     boardDesc.textContent = "加载失败：" + error.message;
@@ -64,7 +55,6 @@ async function init() {
     const user = await getCurrentUser();
     if (user) mountNav(user);
   } catch (e) {}
-  loadLeaderboard(); // 直接加载
+  loadLeaderboard();
 }
-
 init();
